@@ -34,10 +34,10 @@
   - [x] SubTask 6.3: 当网络或 API 失败时，向玩家显示一次性聊天栏提示（如红色文字）。
   - [x] SubTask 6.4: 当返回空结果或解析失败时，不展示建议，记录日志。
 
-- [ ] Task 7: 构建产物并推送
-  - [ ] SubTask 7.1: 运行 `./gradlew build` 生成 jar 包。
-  - [ ] SubTask 7.2: 确认 `build/libs/mojidrop-1.0.0.jar` 存在且可加载。
-  - [ ] SubTask 7.3: 提交所有代码与 spec 文档，并推送到远程仓库。
+- [x] Task 7: 构建产物并推送
+  - [x] SubTask 7.1: 运行 `./gradlew build` 生成 jar 包。
+  - [x] SubTask 7.2: 确认 `build/libs/mojidrop-1.0.0.jar` 存在且可加载。
+  - [x] SubTask 7.3: 提交所有代码与 spec 文档，并推送到远程仓库。
 
 # Task Dependencies
 - Task 2 依赖 Task 1
