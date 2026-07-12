@@ -1,5 +1,6 @@
 package mod.dra6a.client.mixin;
 
+import mod.dra6a.client.EmojiSuggestionDisplay;
 import mod.dra6a.client.config.MojiDropConfig;
 import mod.dra6a.client.service.EmojiSuggestionService;
 import net.minecraft.ChatFormatting;
