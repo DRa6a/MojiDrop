@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "mojidrop",
+	"version": "${version}",
+	"name": "MojiDrop",
+	"description": "AI-powered kaomoji suggestions for Minecraft chat",
+	"authors": [
+		"DRa6a"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/DRa6a/MojiDrop"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/mojidrop/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"mod.dra6a.MojiDrop"
+		],
+		"client": [
+			"mod.dra6a.client.MojiDropClient"
+		]
+	},
+	"mixins": [
+		"mojidrop.mixins.json",
+		{
+			"config": "mojidrop.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

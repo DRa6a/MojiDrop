@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"package": "mod.dra6a.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"ExampleClientMixin",
+		"ChatScreenMixin",
+		"CommandSuggestionsMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
