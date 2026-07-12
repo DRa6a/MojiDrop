@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(CommandSuggestions.class)
-public class CommandSuggestionsMixin {
+public class CommandSuggestionsMixin implements EmojiSuggestionDisplay {
 	@Shadow
 	private EditBox input;
 
@@ -24,6 +24,7 @@ public class CommandSuggestionsMixin {
 	public void showSuggestions(boolean immediateNarration) {
 	}
 
+	@Override
 	public void mojidrop$showEmojiSuggestions(List<String> emojis) {
 		String text = this.input.getValue();
 		StringRange range = StringRange.at(text.length());

@@ -77,7 +77,7 @@ public class ChatScreenMixin {
 				MOJIDROP_LOGGER.warn("[MojiDrop] Empty emoji suggestion result");
 				return;
 			}
-			((CommandSuggestionsMixin) (Object) this.commandSuggestions).mojidrop$showEmojiSuggestions(suggestions);
+			((EmojiSuggestionDisplay) this.commandSuggestions).mojidrop$showEmojiSuggestions(suggestions);
 		});
 
 		Consumer<Throwable> onError = error -> Minecraft.getInstance().execute(() -> {
