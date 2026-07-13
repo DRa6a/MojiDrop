@@ -17,6 +17,7 @@ public class MojiDropConfig {
 	private static MojiDropConfig INSTANCE;
 
 	public static final String DEFAULT_SYSTEM_PROMPT = "You are a kaomoji suggestion assistant. Based on the chat context provided, suggest 1 to %d relevant kaomoji (Japanese emoticons). Return only the kaomoji, either one per line or separated by commas. Do not include explanations, labels, or markdown formatting.";
+	public static final String DEFAULT_QA_SYSTEM_PROMPT = "You are a concise Q&A assistant. Answer the user's question briefly and clearly. Keep answers short.";
 
 	public String apiKey = "";
 	public String apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -25,6 +26,14 @@ public class MojiDropConfig {
 	public int maxSuggestions = 3;
 	public int requestCooldownMs = 500;
 	public boolean enabled = true;
+
+	public boolean qaEnabled = true;
+	public boolean qaUseSameAi = true;
+	public String qaApiKey = "";
+	public String qaApiUrl = "";
+	public String qaModel = "";
+	public String qaSystemPrompt = DEFAULT_QA_SYSTEM_PROMPT;
+	public int qaMaxTokens = 150;
 
 	public static MojiDropConfig get() {
 		if (INSTANCE == null) {
@@ -88,6 +97,24 @@ public class MojiDropConfig {
 		}
 		if (requestCooldownMs < 0) {
 			requestCooldownMs = 0;
+		}
+		if (qaApiKey == null) {
+			qaApiKey = "";
+		}
+		if (qaApiUrl == null) {
+			qaApiUrl = "";
+		}
+		if (qaModel == null) {
+			qaModel = "";
+		}
+		if (qaSystemPrompt == null || qaSystemPrompt.isBlank()) {
+			qaSystemPrompt = DEFAULT_QA_SYSTEM_PROMPT;
+		}
+		if (qaMaxTokens < 1) {
+			qaMaxTokens = 1;
+		}
+		if (qaMaxTokens > 2048) {
+			qaMaxTokens = 2048;
 		}
 	}
 }

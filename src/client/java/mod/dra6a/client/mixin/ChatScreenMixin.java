@@ -1,8 +1,10 @@
 package mod.dra6a.client.mixin;
 
 import mod.dra6a.client.EmojiSuggestionDisplay;
+import mod.dra6a.client.QaSuggestionDisplay;
 import mod.dra6a.client.config.MojiDropConfig;
 import mod.dra6a.client.service.EmojiSuggestionService;
+import mod.dra6a.client.service.QaService;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.CommandSuggestions;
@@ -25,6 +27,7 @@ import java.util.function.Consumer;
 @Mixin(ChatScreen.class)
 public class ChatScreenMixin {
 	private static final Logger MOJIDROP_LOGGER = LoggerFactory.getLogger("MojiDrop");
+	private static final String QA_TRIGGER = "#q:";
 
 	@Unique
 	private static final AtomicBoolean mojidrop$requestInFlight = new AtomicBoolean(false);
@@ -36,10 +39,31 @@ public class ChatScreenMixin {
 	private static volatile String mojidrop$lastRequestedText = null;
 
 	@Unique
+	private static final AtomicBoolean mojidrop$qaRequestInFlight = new AtomicBoolean(false);
+
+	@Unique
+	private static volatile long mojidrop$qaLastRequestTime = 0L;
+
+	@Unique
+	private static volatile String mojidrop$qaLastRequestedText = null;
+
+	@Unique
+	private static volatile int mojidrop$qaLastRangeStart = -1;
+
+	@Unique
+	private static volatile int mojidrop$qaLastRangeEnd = -1;
+
+	@Unique
 	private static boolean mojidrop$apiConfigWarningShown = false;
 
 	@Unique
 	private static boolean mojidrop$requestErrorWarningShown = false;
+
+	@Unique
+	private static boolean mojidrop$qaConfigWarningShown = false;
+
+	@Unique
+	private static boolean mojidrop$qaRequestErrorWarningShown = false;
 
 	@Shadow
 	protected EditBox input;
@@ -49,17 +73,23 @@ public class ChatScreenMixin {
 
 	@Inject(method = "onEdited", at = @At("HEAD"))
 	private void mojidrop$onChatEdited(String value, CallbackInfo ci) {
+		if (value == null) {
+			return;
+		}
+
 		MojiDropConfig config = MojiDropConfig.get();
-		if (!config.enabled) {
-			return;
-		}
-
-		if (value == null || !value.endsWith(" ")) {
-			return;
-		}
-
 		String trimmed = value.trim();
-		if (trimmed.startsWith("/")) {
+		boolean isCommand = trimmed.startsWith("/");
+
+		if (config.qaEnabled && !isCommand && mojidrop$tryTriggerQa(value, config)) {
+			return;
+		}
+
+		if (!config.enabled || isCommand) {
+			return;
+		}
+
+		if (!value.endsWith(" ")) {
 			return;
 		}
 
@@ -95,6 +125,71 @@ public class ChatScreenMixin {
 	}
 
 	@Unique
+	private boolean mojidrop$tryTriggerQa(String value, MojiDropConfig config) {
+		if (!value.endsWith(" ")) {
+			return false;
+		}
+
+		int triggerIndex = value.lastIndexOf(QA_TRIGGER);
+		if (triggerIndex < 0) {
+			return false;
+		}
+
+		int questionStart = triggerIndex + QA_TRIGGER.length();
+		String question = value.substring(questionStart).trim();
+		if (question.isEmpty()) {
+			return false;
+		}
+
+		long now = System.currentTimeMillis();
+		if (now - mojidrop$qaLastRequestTime < config.requestCooldownMs) {
+			MOJIDROP_LOGGER.debug("[MojiDrop] QA request skipped due to cooldown");
+			return false;
+		}
+
+		if (mojidrop$qaRequestInFlight.get() && value.equals(mojidrop$qaLastRequestedText)) {
+			return false;
+		}
+
+		mojidrop$qaLastRequestTime = now;
+		mojidrop$qaLastRequestedText = value;
+		mojidrop$qaRequestInFlight.set(true);
+		mojidrop$qaLastRangeStart = triggerIndex;
+		mojidrop$qaLastRangeEnd = value.length();
+
+		Consumer<String> onSuccess = answer -> Minecraft.getInstance().execute(() -> {
+			mojidrop$qaRequestInFlight.set(false);
+			if (answer == null || answer.isEmpty()) {
+				MOJIDROP_LOGGER.warn("[MojiDrop] Empty QA answer");
+				return;
+			}
+
+			String currentValue = this.input.getValue();
+			if (!currentValue.equals(mojidrop$qaLastRequestedText)) {
+				MOJIDROP_LOGGER.debug("[MojiDrop] QA answer ignored because input changed");
+				return;
+			}
+
+			String prefixed = QaService.makePrefixedAnswer(answer);
+			String summary = QaService.makeSummary(prefixed);
+			((QaSuggestionDisplay) this.commandSuggestions).mojidrop$showQaSuggestion(
+				summary,
+				prefixed,
+				mojidrop$qaLastRangeStart,
+				mojidrop$qaLastRangeEnd
+			);
+		});
+
+		Consumer<Throwable> onError = error -> Minecraft.getInstance().execute(() -> {
+			mojidrop$qaRequestInFlight.set(false);
+			mojidrop$handleQaError(error);
+		});
+
+		QaService.requestAnswer(question, onSuccess, onError);
+		return true;
+	}
+
+	@Unique
 	private void mojidrop$handleRequestError(Throwable error) {
 		String message = error.getMessage();
 		if (error instanceof IllegalStateException && "API key or URL not configured".equals(message)) {
@@ -114,6 +209,31 @@ public class ChatScreenMixin {
 				}
 				Minecraft.getInstance().gui.getChat().addClientSystemMessage(
 					Component.literal("[MojiDrop] 请求失败: " + displayMessage).withStyle(ChatFormatting.RED)
+				);
+			}
+		}
+	}
+
+	@Unique
+	private void mojidrop$handleQaError(Throwable error) {
+		String message = error.getMessage();
+		if (error instanceof IllegalStateException && "API key or URL not configured".equals(message)) {
+			if (!mojidrop$qaConfigWarningShown) {
+				mojidrop$qaConfigWarningShown = true;
+				Minecraft.getInstance().gui.getChat().addClientSystemMessage(
+					Component.literal("[MojiDrop 问答] API Key 或 API URL 未配置，请按 O 键打开配置界面").withStyle(ChatFormatting.RED)
+				);
+			}
+		} else {
+			MOJIDROP_LOGGER.error("[MojiDrop] QA request failed: {}", message, error);
+			if (!mojidrop$qaRequestErrorWarningShown) {
+				mojidrop$qaRequestErrorWarningShown = true;
+				String displayMessage = message == null ? error.getClass().getSimpleName() : message;
+				if (displayMessage.length() > 240) {
+					displayMessage = displayMessage.substring(0, 240);
+				}
+				Minecraft.getInstance().gui.getChat().addClientSystemMessage(
+					Component.literal("[MojiDrop 问答] 请求失败: " + displayMessage).withStyle(ChatFormatting.RED)
 				);
 			}
 		}

@@ -4,7 +4,10 @@ import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import mod.dra6a.client.EmojiSuggestionDisplay;
+import mod.dra6a.client.QaSuggestionDisplay;
 import mod.dra6a.client.service.PlayerMentionService;
+import mod.dra6a.client.service.QaService;
+import mod.dra6a.client.service.QaSuggestion;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +21,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(CommandSuggestions.class)
-public class CommandSuggestionsMixin implements EmojiSuggestionDisplay {
+public class CommandSuggestionsMixin implements EmojiSuggestionDisplay, QaSuggestionDisplay {
 	@Shadow
 	private EditBox input;
 
@@ -38,6 +41,16 @@ public class CommandSuggestionsMixin implements EmojiSuggestionDisplay {
 		for (String emoji : emojis) {
 			suggestionList.add(new Suggestion(range, emoji));
 		}
+
+		this.pendingSuggestions = CompletableFuture.completedFuture(new Suggestions(range, suggestionList));
+		this.showSuggestions(true);
+	}
+
+	@Override
+	public void mojidrop$showQaSuggestion(String summary, String fullAnswer, int rangeStart, int rangeEnd) {
+		StringRange range = new StringRange(rangeStart, rangeEnd);
+		List<Suggestion> suggestionList = new ArrayList<>();
+		suggestionList.add(new QaSuggestion(range, summary, fullAnswer));
 
 		this.pendingSuggestions = CompletableFuture.completedFuture(new Suggestions(range, suggestionList));
 		this.showSuggestions(true);
