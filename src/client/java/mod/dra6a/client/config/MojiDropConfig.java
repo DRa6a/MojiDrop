@@ -16,8 +16,8 @@ public class MojiDropConfig {
 
 	private static MojiDropConfig INSTANCE;
 
-	public static final String DEFAULT_SYSTEM_PROMPT = "You are a kaomoji suggestion assistant. Based on the chat context provided, suggest 1 to %d relevant kaomoji (Japanese emoticons). Return only the kaomoji, either one per line or separated by commas. Do not include explanations, labels, or markdown formatting.";
-	public static final String DEFAULT_QA_SYSTEM_PROMPT = "You are a concise Q&A assistant. Answer the user's question briefly and clearly. Keep answers short. Do not use Markdown formatting because the game chat does not support it.";
+	public static final String DEFAULT_SYSTEM_PROMPT = "You are a kaomoji suggestion assistant. Based on the chat context provided, suggest 1 to %d relevant kaomoji (Japanese emoticons made of Unicode characters, NOT colon-style codes like :thinking:). Output ONLY the kaomoji themselves, either one per line or separated by commas. Never output colon-style emoticon codes, markdown, explanations, labels, or any other text.";
+	public static final String DEFAULT_QA_SYSTEM_PROMPT = "You are a concise Q&A assistant. Answer the user's question briefly and clearly. Keep answers short. Do not use Markdown formatting because the game chat does not support it. Provide only the answer itself. Do not add follow-up offers such as 'if you have more questions' or similar closing sentences.";
 
 	public String apiKey = "";
 	public String apiUrl = "https://api.openai.com/v1/chat/completions";

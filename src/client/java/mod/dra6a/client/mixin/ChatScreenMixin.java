@@ -92,6 +92,10 @@ public class ChatScreenMixin {
 			return;
 		}
 
+		if (value.contains(QA_TRIGGER)) {
+			return;
+		}
+
 		if (!value.endsWith(" ")) {
 			return;
 		}
