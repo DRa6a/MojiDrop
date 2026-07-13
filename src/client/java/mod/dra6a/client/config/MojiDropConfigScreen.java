@@ -59,37 +59,37 @@ public class MojiDropConfigScreen extends Screen {
 		int y = TOP_PADDING;
 
 		this.apiKeyBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("API Key"));
-		this.apiKeyBox.setValue(config.apiKey);
 		this.apiKeyBox.setMaxLength(8192);
+		this.apiKeyBox.setValue(config.apiKey);
 		this.apiKeyBox.setHint(Component.literal("例如：sk-...").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.apiKeyBox);
 		y += spacing;
 
 		this.apiUrlBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("API URL"));
-		this.apiUrlBox.setValue(config.apiUrl);
 		this.apiUrlBox.setMaxLength(4096);
+		this.apiUrlBox.setValue(config.apiUrl);
 		this.apiUrlBox.setHint(Component.literal("OpenAI 兼容地址").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.apiUrlBox);
 		y += spacing;
 
 		this.modelBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("Model"));
-		this.modelBox.setValue(config.model);
 		this.modelBox.setMaxLength(512);
+		this.modelBox.setValue(config.model);
 		this.modelBox.setHint(Component.literal("例如：gpt-3.5-turbo").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.modelBox);
 		y += spacing;
 
 		this.maxSuggestionsBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("Max Suggestions"));
-		this.maxSuggestionsBox.setValue(String.valueOf(config.maxSuggestions));
 		this.maxSuggestionsBox.setMaxLength(1);
+		this.maxSuggestionsBox.setValue(String.valueOf(config.maxSuggestions));
 		this.maxSuggestionsBox.setHint(Component.literal("1 - 5").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.allowOnlyDigits(this.maxSuggestionsBox);
 		this.addRenderableWidget(this.maxSuggestionsBox);
 		y += spacing;
 
 		this.requestCooldownBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("Request Cooldown (ms)"));
-		this.requestCooldownBox.setValue(String.valueOf(config.requestCooldownMs));
 		this.requestCooldownBox.setMaxLength(9);
+		this.requestCooldownBox.setValue(String.valueOf(config.requestCooldownMs));
 		this.requestCooldownBox.setHint(Component.literal("两次请求间隔，毫秒").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.allowOnlyDigits(this.requestCooldownBox);
 		this.addRenderableWidget(this.requestCooldownBox);
