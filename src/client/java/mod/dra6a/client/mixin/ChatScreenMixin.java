@@ -54,6 +54,9 @@ public class ChatScreenMixin {
 	private static volatile int mojidrop$qaLastRangeEnd = -1;
 
 	@Unique
+	private static volatile String mojidrop$qaLastTriggeredText = null;
+
+	@Unique
 	private static boolean mojidrop$apiConfigWarningShown = false;
 
 	@Unique
@@ -126,7 +129,7 @@ public class ChatScreenMixin {
 
 	@Unique
 	private boolean mojidrop$tryTriggerQa(String value, MojiDropConfig config) {
-		if (!value.endsWith(" ")) {
+		if (mojidrop$qaLastTriggeredText != null && value.startsWith(mojidrop$qaLastTriggeredText)) {
 			return false;
 		}
 
@@ -135,8 +138,36 @@ public class ChatScreenMixin {
 			return false;
 		}
 
-		int questionStart = triggerIndex + QA_TRIGGER.length();
-		String question = value.substring(questionStart).trim();
+		int contentStart = triggerIndex + QA_TRIGGER.length();
+		if (contentStart > value.length()) {
+			return false;
+		}
+
+		String afterTrigger = value.substring(contentStart);
+		String question;
+		int questionEndInValue;
+
+		if (config.qaStrictTrigger) {
+			if (afterTrigger.startsWith(" ")) {
+				return false;
+			}
+
+			int spaceIndex = afterTrigger.indexOf(' ');
+			if (spaceIndex < 0) {
+				return false;
+			}
+
+			question = afterTrigger.substring(0, spaceIndex).trim();
+			questionEndInValue = contentStart + spaceIndex + 1;
+		} else {
+			if (!value.endsWith(" ")) {
+				return false;
+			}
+
+			question = afterTrigger.trim();
+			questionEndInValue = value.length();
+		}
+
 		if (question.isEmpty()) {
 			return false;
 		}
@@ -154,8 +185,16 @@ public class ChatScreenMixin {
 		mojidrop$qaLastRequestTime = now;
 		mojidrop$qaLastRequestedText = value;
 		mojidrop$qaRequestInFlight.set(true);
-		mojidrop$qaLastRangeStart = triggerIndex;
-		mojidrop$qaLastRangeEnd = value.length();
+		mojidrop$qaLastTriggeredText = value.substring(0, questionEndInValue);
+
+		boolean appendMode = "append".equals(config.qaAnswerMode);
+		if (appendMode) {
+			mojidrop$qaLastRangeStart = questionEndInValue;
+			mojidrop$qaLastRangeEnd = questionEndInValue;
+		} else {
+			mojidrop$qaLastRangeStart = triggerIndex;
+			mojidrop$qaLastRangeEnd = questionEndInValue;
+		}
 
 		Consumer<String> onSuccess = answer -> Minecraft.getInstance().execute(() -> {
 			mojidrop$qaRequestInFlight.set(false);
