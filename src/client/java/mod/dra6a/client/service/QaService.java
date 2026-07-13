@@ -10,10 +10,27 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class QaService {
 	private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
+
+	private static final List<String> TRAILING_OFFER_PATTERNS = List.of(
+		"有什么可以帮你的吗[？?]",
+		"有什么我能帮你的吗[？?]",
+		"有什么我可以帮你的吗[？?]",
+		"有什么需要我帮忙的吗[？?]",
+		"还有什么可以帮你的吗[？?]",
+		"还需要我帮你什么吗[？?]",
+		"还有其他问题吗[？?]",
+		"如果[^。]*(?:请|随时|告诉我|联系我)[^。]*[。]?",
+		"If you have[^.]*questions[^.]*[.]?",
+		"If you need[^.]*help[^.]*[.]?",
+		"Feel free to ask[^.]*[.]?",
+		"Let me know if[^.]*[.]?",
+		"Do you have any other questions[^.]*[.]?"
+	);
 
 	public static void requestAnswer(String question, Consumer<String> onSuccess, Consumer<Throwable> onError) {
 		MojiDropConfig config = MojiDropConfig.get();
@@ -82,7 +99,7 @@ public class QaService {
 						throw new RuntimeException("No message in first choice");
 					}
 
-					String content = message.get("content").getAsString().trim();
+					String content = sanitizeAnswer(message.get("content").getAsString());
 					if (content.isEmpty()) {
 						throw new RuntimeException("Empty answer");
 					}
@@ -96,6 +113,17 @@ public class QaService {
 				onError.accept(throwable);
 				return null;
 			});
+	}
+
+	public static String sanitizeAnswer(String answer) {
+		String result = answer.trim();
+		for (String pattern : TRAILING_OFFER_PATTERNS) {
+			if (result.isEmpty()) {
+				break;
+			}
+			result = result.replaceFirst("(?i)[\\s。]*" + pattern + "\\s*$", "").trim();
+		}
+		return result;
 	}
 
 	public static String makeSummary(String answer) {
