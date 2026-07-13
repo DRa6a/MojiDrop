@@ -104,8 +104,8 @@ public class ChatScreenMixin {
 			if (!mojidrop$requestErrorWarningShown) {
 				mojidrop$requestErrorWarningShown = true;
 				String displayMessage = message == null ? error.getClass().getSimpleName() : message;
-				if (displayMessage.length() > 80) {
-					displayMessage = displayMessage.substring(0, 80);
+				if (displayMessage.length() > 240) {
+					displayMessage = displayMessage.substring(0, 240);
 				}
 				Minecraft.getInstance().gui.getChat().addClientSystemMessage(
 					Component.literal("[MojiDrop] 请求失败: " + displayMessage).withStyle(ChatFormatting.RED)

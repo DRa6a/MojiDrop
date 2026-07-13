@@ -11,6 +11,9 @@ public class MojiDropConfigScreen extends Screen {
 	private static final int FIELD_HEIGHT = 20;
 	private static final int BUTTON_WIDTH = 100;
 	private static final int BUTTON_HEIGHT = 20;
+	private static final int BASE_SPACING = 34;
+	private static final int TOP_PADDING = 35;
+	private static final int BOTTOM_RESERVED = 35;
 
 	private final Screen lastScreen;
 
@@ -35,26 +38,37 @@ public class MojiDropConfigScreen extends Screen {
 		this.enabled = config.enabled;
 
 		int x = this.width / 2 - FIELD_WIDTH / 2;
-		int y = 40;
-		int spacing = 36;
+		int fieldCount = 6;
+		int requiredMinHeight = TOP_PADDING + fieldCount * BASE_SPACING + 10 + BUTTON_HEIGHT + BOTTOM_RESERVED;
+		int spacing = BASE_SPACING;
+		if (this.height < requiredMinHeight) {
+			int available = this.height - TOP_PADDING - 10 - BUTTON_HEIGHT - BOTTOM_RESERVED;
+			if (available > fieldCount * 22) {
+				spacing = available / fieldCount;
+			} else {
+				spacing = 22;
+			}
+		}
+
+		int y = TOP_PADDING;
 
 		this.apiKeyBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("API Key"));
 		this.apiKeyBox.setValue(config.apiKey);
-		this.apiKeyBox.setMaxLength(256);
+		this.apiKeyBox.setMaxLength(2048);
 		this.apiKeyBox.setHint(Component.literal("例如：sk-...").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.apiKeyBox);
 		y += spacing;
 
 		this.apiUrlBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("API URL"));
 		this.apiUrlBox.setValue(config.apiUrl);
-		this.apiUrlBox.setMaxLength(256);
+		this.apiUrlBox.setMaxLength(1024);
 		this.apiUrlBox.setHint(Component.literal("OpenAI 兼容地址").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.apiUrlBox);
 		y += spacing;
 
 		this.modelBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("Model"));
 		this.modelBox.setValue(config.model);
-		this.modelBox.setMaxLength(128);
+		this.modelBox.setMaxLength(256);
 		this.modelBox.setHint(Component.literal("例如：gpt-3.5-turbo").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.modelBox);
 		y += spacing;
@@ -177,7 +191,7 @@ public class MojiDropConfigScreen extends Screen {
 
 		if (this.statusMessage != null) {
 			int statusWidth = this.font.width(this.statusMessage);
-			graphics.text(this.font, this.statusMessage, this.width / 2 - statusWidth / 2, this.height - 30, 0xFFFFFF);
+			graphics.text(this.font, this.statusMessage, this.width / 2 - statusWidth / 2, this.height - 20, 0xFFFFFF);
 		}
 	}
 
