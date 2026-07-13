@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mod.dra6a.client.config.MojiDropConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -17,9 +19,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class EmojiSuggestionService {
+	private static final Logger LOGGER = LoggerFactory.getLogger("MojiDrop");
 	private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
-	private static final Pattern WORD_LIKE_PATTERN = Pattern.compile("[\\p{IsHiragana}\\p{IsKatakana}\\p{IsCJKUnifiedIdeographs}]{3,}");
+	private static final Pattern WORD_LIKE_PATTERN = Pattern.compile("[\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FFF]{3,}");
 
 	public static void requestSuggestions(String context, Consumer<List<String>> onSuccess, Consumer<Throwable> onError) {
 		MojiDropConfig config = MojiDropConfig.get();
@@ -78,11 +81,19 @@ public class EmojiSuggestionService {
 					}
 
 					String content = message.get("content").getAsString();
-					List<String> suggestions = Arrays.stream(content.split("[\n,]"))
+					List<String> rawSuggestions = Arrays.stream(content.split("[\n,]"))
 						.map(String::trim)
-						.filter(s -> !s.isEmpty() && !isWordLike(s))
+						.filter(s -> !s.isEmpty())
+						.collect(Collectors.toList());
+
+					List<String> suggestions = rawSuggestions.stream()
+						.filter(s -> !isWordLike(s))
 						.limit(config.maxSuggestions)
 						.collect(Collectors.toList());
+
+					if (suggestions.isEmpty() && !rawSuggestions.isEmpty()) {
+						LOGGER.warn("[MojiDrop] All {} emoji suggestions were filtered as word-like: {}", rawSuggestions.size(), rawSuggestions);
+					}
 
 					onSuccess.accept(suggestions);
 				} catch (Exception e) {
