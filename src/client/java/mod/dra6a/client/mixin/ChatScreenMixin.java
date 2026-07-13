@@ -58,6 +58,11 @@ public class ChatScreenMixin {
 			return;
 		}
 
+		String trimmed = value.trim();
+		if (trimmed.startsWith("/")) {
+			return;
+		}
+
 		long now = System.currentTimeMillis();
 		if (now - mojidrop$lastRequestTime < config.requestCooldownMs) {
 			MOJIDROP_LOGGER.debug("[MojiDrop] Request skipped due to cooldown");

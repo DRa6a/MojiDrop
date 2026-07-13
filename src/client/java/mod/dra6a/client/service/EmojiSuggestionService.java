@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 public class EmojiSuggestionService {
 	private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
-	private static final String SYSTEM_PROMPT = "You are a kaomoji suggestion assistant. Based on the chat context provided, suggest 1 to %d relevant kaomoji (Japanese emoticons). Return only the kaomoji, either one per line or separated by commas. Do not include explanations, labels, or markdown formatting.";
 
 	public static void requestSuggestions(String context, Consumer<List<String>> onSuccess, Consumer<Throwable> onError) {
 		MojiDropConfig config = MojiDropConfig.get();
@@ -37,7 +36,10 @@ public class EmojiSuggestionService {
 
 		JsonObject systemMessage = new JsonObject();
 		systemMessage.addProperty("role", "system");
-		systemMessage.addProperty("content", String.format(SYSTEM_PROMPT, config.maxSuggestions));
+		String prompt = config.systemPrompt != null && !config.systemPrompt.isBlank()
+			? config.systemPrompt
+			: MojiDropConfig.DEFAULT_SYSTEM_PROMPT;
+		systemMessage.addProperty("content", String.format(prompt, config.maxSuggestions));
 		messages.add(systemMessage);
 
 		JsonObject userMessage = new JsonObject();

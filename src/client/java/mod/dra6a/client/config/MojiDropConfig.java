@@ -16,9 +16,12 @@ public class MojiDropConfig {
 
 	private static MojiDropConfig INSTANCE;
 
+	public static final String DEFAULT_SYSTEM_PROMPT = "You are a kaomoji suggestion assistant. Based on the chat context provided, suggest 1 to %d relevant kaomoji (Japanese emoticons). Return only the kaomoji, either one per line or separated by commas. Do not include explanations, labels, or markdown formatting.";
+
 	public String apiKey = "";
 	public String apiUrl = "https://api.openai.com/v1/chat/completions";
 	public String model = "gpt-3.5-turbo";
+	public String systemPrompt = DEFAULT_SYSTEM_PROMPT;
 	public int maxSuggestions = 3;
 	public int requestCooldownMs = 500;
 	public boolean enabled = true;
@@ -73,6 +76,9 @@ public class MojiDropConfig {
 		}
 		if (model == null) {
 			model = "gpt-3.5-turbo";
+		}
+		if (systemPrompt == null || systemPrompt.isBlank()) {
+			systemPrompt = DEFAULT_SYSTEM_PROMPT;
 		}
 		if (maxSuggestions < 1) {
 			maxSuggestions = 1;

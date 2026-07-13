@@ -21,6 +21,7 @@ public class MojiDropConfigScreen extends Screen {
 	private EditBox apiKeyBox;
 	private EditBox apiUrlBox;
 	private EditBox modelBox;
+	private EditBox systemPromptBox;
 	private EditBox maxSuggestionsBox;
 	private EditBox requestCooldownBox;
 	private Button enabledButton;
@@ -44,7 +45,7 @@ public class MojiDropConfigScreen extends Screen {
 			this.fieldWidth = 160;
 		}
 		int x = this.width / 2 - this.fieldWidth / 2;
-		int fieldCount = 6;
+		int fieldCount = 7;
 		int requiredMinHeight = TOP_PADDING + fieldCount * BASE_SPACING + 10 + BUTTON_HEIGHT + BOTTOM_RESERVED;
 		int spacing = BASE_SPACING;
 		if (this.height < requiredMinHeight) {
@@ -77,6 +78,13 @@ public class MojiDropConfigScreen extends Screen {
 		this.modelBox.setValue(config.model);
 		this.modelBox.setHint(Component.literal("例如：gpt-3.5-turbo").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.modelBox);
+		y += spacing;
+
+		this.systemPromptBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("System Prompt"));
+		this.systemPromptBox.setMaxLength(8192);
+		this.systemPromptBox.setValue(config.systemPrompt);
+		this.systemPromptBox.setHint(Component.literal("控制 AI 返回颜文字的风格").withStyle(net.minecraft.ChatFormatting.GRAY));
+		this.addRenderableWidget(this.systemPromptBox);
 		y += spacing;
 
 		this.maxSuggestionsBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("Max Suggestions"));
@@ -130,6 +138,7 @@ public class MojiDropConfigScreen extends Screen {
 		config.apiKey = this.apiKeyBox.getValue();
 		config.apiUrl = this.apiUrlBox.getValue();
 		config.model = this.modelBox.getValue();
+		config.systemPrompt = this.systemPromptBox.getValue();
 
 		int maxSuggestions;
 		try {
@@ -192,6 +201,7 @@ public class MojiDropConfigScreen extends Screen {
 		this.drawLabel(graphics, "API Key（从 AI 服务商获取）", this.apiKeyBox.getY());
 		this.drawLabel(graphics, "API URL（OpenAI 兼容接口地址）", this.apiUrlBox.getY());
 		this.drawLabel(graphics, "Model（模型名称）", this.modelBox.getY());
+		this.drawLabel(graphics, "System Prompt（系统提示词，%d 表示最大数量）", this.systemPromptBox.getY());
 		this.drawLabel(graphics, "Max Suggestions（1-5）", this.maxSuggestionsBox.getY());
 		this.drawLabel(graphics, "Request Cooldown（请求间隔，毫秒）", this.requestCooldownBox.getY());
 
