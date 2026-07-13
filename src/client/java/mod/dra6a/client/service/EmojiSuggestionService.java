@@ -13,10 +13,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class EmojiSuggestionService {
 	private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
+
+	private static final Pattern WORD_LIKE_PATTERN = Pattern.compile("[\\p{IsHiragana}\\p{IsKatakana}\\p{IsCJKUnifiedIdeographs}]{3,}");
 
 	public static void requestSuggestions(String context, Consumer<List<String>> onSuccess, Consumer<Throwable> onError) {
 		MojiDropConfig config = MojiDropConfig.get();
@@ -77,7 +80,7 @@ public class EmojiSuggestionService {
 					String content = message.get("content").getAsString();
 					List<String> suggestions = Arrays.stream(content.split("[\n,]"))
 						.map(String::trim)
-						.filter(s -> !s.isEmpty())
+						.filter(s -> !s.isEmpty() && !isWordLike(s))
 						.limit(config.maxSuggestions)
 						.collect(Collectors.toList());
 
@@ -90,5 +93,9 @@ public class EmojiSuggestionService {
 				onError.accept(throwable);
 				return null;
 			});
+	}
+
+	private static boolean isWordLike(String suggestion) {
+		return WORD_LIKE_PATTERN.matcher(suggestion).find();
 	}
 }

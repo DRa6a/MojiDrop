@@ -92,7 +92,7 @@ public class ChatScreenMixin {
 			return;
 		}
 
-		if (value.contains(QA_TRIGGER)) {
+		if (mojidrop$isUnansweredQaPresent(value)) {
 			return;
 		}
 
@@ -134,7 +134,10 @@ public class ChatScreenMixin {
 	@Unique
 	private boolean mojidrop$tryTriggerQa(String value, MojiDropConfig config) {
 		if (mojidrop$qaLastTriggeredText != null && value.startsWith(mojidrop$qaLastTriggeredText)) {
-			return false;
+			int nextQa = value.indexOf(QA_TRIGGER, mojidrop$qaLastTriggeredText.length());
+			if (nextQa < 0) {
+				return false;
+			}
 		}
 
 		int triggerIndex = value.lastIndexOf(QA_TRIGGER);
@@ -230,6 +233,18 @@ public class ChatScreenMixin {
 
 		QaService.requestAnswer(question, onSuccess, onError);
 		return true;
+	}
+
+	@Unique
+	private boolean mojidrop$isUnansweredQaPresent(String value) {
+		if (!value.contains(QA_TRIGGER)) {
+			return false;
+		}
+
+		int lastQa = value.lastIndexOf(QA_TRIGGER);
+		String afterLastQa = value.substring(lastQa + QA_TRIGGER.length());
+		String lower = afterLastQa.toLowerCase();
+		return !lower.contains("a:") && !lower.contains("a：");
 	}
 
 	@Unique
