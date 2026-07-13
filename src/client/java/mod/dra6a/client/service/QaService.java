@@ -99,8 +99,10 @@ public class QaService {
 						throw new RuntimeException("No message in first choice");
 					}
 
-					String content = sanitizeAnswer(message.get("content").getAsString());
-					if (content.isEmpty()) {
+					String rawContent = message.get("content").getAsString();
+				DebugLogService.log("QA", question, rawContent);
+				String content = sanitizeAnswer(rawContent);
+				if (content.isEmpty()) {
 						throw new RuntimeException("Empty answer");
 					}
 

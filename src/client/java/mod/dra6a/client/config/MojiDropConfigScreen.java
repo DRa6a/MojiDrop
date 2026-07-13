@@ -32,7 +32,9 @@ public class MojiDropConfigScreen extends Screen {
 	private EditBox maxSuggestionsBox;
 	private EditBox requestCooldownBox;
 	private Button enabledButton;
+	private Button debugLoggingButton;
 	private boolean enabled;
+	private boolean debugLogging;
 
 	private Button qaEnabledButton;
 	private Button qaUseSameAiButton;
@@ -71,6 +73,7 @@ public class MojiDropConfigScreen extends Screen {
 
 		MojiDropConfig config = MojiDropConfig.get();
 		this.enabled = config.enabled;
+		this.debugLogging = config.debugLogging;
 		this.qaEnabled = config.qaEnabled;
 		this.qaUseSameAi = config.qaUseSameAi;
 		this.qaAnswerMode = config.qaAnswerMode;
@@ -109,6 +112,9 @@ public class MojiDropConfigScreen extends Screen {
 		y += BASE_SPACING;
 
 		this.enabledButton = this.addToggleButton(x, y, this::enabledLabel, () -> this.enabled = !this.enabled);
+		y += BASE_SPACING;
+
+		this.debugLoggingButton = this.addToggleButton(x, y, this::debugLoggingLabel, () -> this.debugLogging = !this.debugLogging);
 		y += BASE_SPACING + SECTION_EXTRA_SPACING;
 
 		this.addSectionLabel("AI 问答（#q: 触发）", y);
@@ -205,6 +211,10 @@ public class MojiDropConfigScreen extends Screen {
 
 	private Component enabledLabel() {
 		return Component.literal("启用颜文字补全：" + (this.enabled ? "是" : "否"));
+	}
+
+	private Component debugLoggingLabel() {
+		return Component.literal("启用调试日志：" + (this.debugLogging ? "是" : "否"));
 	}
 
 	private Component qaEnabledLabel() {
@@ -304,6 +314,7 @@ public class MojiDropConfigScreen extends Screen {
 		config.requestCooldownMs = cooldown;
 
 		config.enabled = this.enabled;
+		config.debugLogging = this.debugLogging;
 
 		config.qaEnabled = this.qaEnabled;
 		config.qaUseSameAi = this.qaUseSameAi;

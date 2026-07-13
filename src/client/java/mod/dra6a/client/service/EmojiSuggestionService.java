@@ -75,7 +75,9 @@ public class EmojiSuggestionService {
 					}
 
 					String content = message.get("content").getAsString();
-					List<String> suggestions = Arrays.stream(content.split("[\n,]"))
+				DebugLogService.log("Emoji", context, content);
+
+				List<String> suggestions = Arrays.stream(content.split("[\n,]"))
 						.map(String::trim)
 						.filter(s -> !s.isEmpty())
 						.limit(config.maxSuggestions)

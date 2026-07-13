@@ -36,6 +36,7 @@ public class MojiDropConfig {
 	public int qaMaxTokens = 150;
 	public String qaAnswerMode = "replace";
 	public boolean qaStrictTrigger = true;
+	public boolean debugLogging = true;
 
 	public static MojiDropConfig get() {
 		if (INSTANCE == null) {
