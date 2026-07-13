@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class MojiDropConfigScreen extends Screen {
-	private static final int FIELD_WIDTH = 200;
+	private static final int FIELD_WIDTH = 240;
 	private static final int FIELD_HEIGHT = 20;
 	private static final int BUTTON_WIDTH = 100;
 	private static final int BUTTON_HEIGHT = 20;
@@ -21,6 +21,8 @@ public class MojiDropConfigScreen extends Screen {
 	private EditBox requestCooldownBox;
 	private Button enabledButton;
 	private boolean enabled;
+	private Component statusMessage;
+	private int statusMessageTicks;
 
 	public MojiDropConfigScreen(Screen lastScreen) {
 		super(Component.literal("MojiDrop Config"));
@@ -33,30 +35,34 @@ public class MojiDropConfigScreen extends Screen {
 		this.enabled = config.enabled;
 
 		int x = this.width / 2 - FIELD_WIDTH / 2;
-		int y = 50;
-		int spacing = 30;
+		int y = 40;
+		int spacing = 36;
 
 		this.apiKeyBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("API Key"));
 		this.apiKeyBox.setValue(config.apiKey);
 		this.apiKeyBox.setMaxLength(256);
+		this.apiKeyBox.setHint(Component.literal("例如：sk-...").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.apiKeyBox);
 		y += spacing;
 
 		this.apiUrlBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("API URL"));
 		this.apiUrlBox.setValue(config.apiUrl);
 		this.apiUrlBox.setMaxLength(256);
+		this.apiUrlBox.setHint(Component.literal("OpenAI 兼容地址").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.apiUrlBox);
 		y += spacing;
 
 		this.modelBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("Model"));
 		this.modelBox.setValue(config.model);
 		this.modelBox.setMaxLength(128);
+		this.modelBox.setHint(Component.literal("例如：gpt-3.5-turbo").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.modelBox);
 		y += spacing;
 
 		this.maxSuggestionsBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("Max Suggestions"));
 		this.maxSuggestionsBox.setValue(String.valueOf(config.maxSuggestions));
 		this.maxSuggestionsBox.setMaxLength(1);
+		this.maxSuggestionsBox.setHint(Component.literal("1 - 5").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.allowOnlyDigits(this.maxSuggestionsBox);
 		this.addRenderableWidget(this.maxSuggestionsBox);
 		y += spacing;
@@ -64,6 +70,7 @@ public class MojiDropConfigScreen extends Screen {
 		this.requestCooldownBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("Request Cooldown (ms)"));
 		this.requestCooldownBox.setValue(String.valueOf(config.requestCooldownMs));
 		this.requestCooldownBox.setMaxLength(9);
+		this.requestCooldownBox.setHint(Component.literal("两次请求间隔，毫秒").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.allowOnlyDigits(this.requestCooldownBox);
 		this.addRenderableWidget(this.requestCooldownBox);
 		y += spacing;
@@ -131,7 +138,8 @@ public class MojiDropConfigScreen extends Screen {
 		config.enabled = this.enabled;
 
 		MojiDropConfig.save();
-		this.closeWithoutSaving();
+		this.statusMessage = Component.literal("配置已保存").withStyle(net.minecraft.ChatFormatting.GREEN);
+		this.statusMessageTicks = 60;
 	}
 
 	private void closeWithoutSaving() {
@@ -144,25 +152,39 @@ public class MojiDropConfigScreen extends Screen {
 	}
 
 	@Override
+	public void tick() {
+		super.tick();
+		if (this.statusMessageTicks > 0) {
+			this.statusMessageTicks--;
+			if (this.statusMessageTicks <= 0) {
+				this.statusMessage = null;
+			}
+		}
+	}
+
+	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 		super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
 		int titleWidth = this.font.width(this.title);
 		graphics.text(this.font, this.title, this.width / 2 - titleWidth / 2, 20, 0xFFFFFF);
 
-		this.drawLabel(graphics, "API Key", this.apiKeyBox.getY());
-		this.drawLabel(graphics, "API URL", this.apiUrlBox.getY());
-		this.drawLabel(graphics, "Model", this.modelBox.getY());
-		this.drawLabel(graphics, "Max Suggestions", this.maxSuggestionsBox.getY());
-		this.drawLabel(graphics, "Request Cooldown (ms)", this.requestCooldownBox.getY());
-		this.drawLabel(graphics, "Enabled", this.enabledButton.getY());
+		this.drawLabel(graphics, "API Key（从 AI 服务商获取）", this.apiKeyBox.getY());
+		this.drawLabel(graphics, "API URL（OpenAI 兼容接口地址）", this.apiUrlBox.getY());
+		this.drawLabel(graphics, "Model（模型名称）", this.modelBox.getY());
+		this.drawLabel(graphics, "Max Suggestions（1-5）", this.maxSuggestionsBox.getY());
+		this.drawLabel(graphics, "Request Cooldown（请求间隔，毫秒）", this.requestCooldownBox.getY());
+
+		if (this.statusMessage != null) {
+			int statusWidth = this.font.width(this.statusMessage);
+			graphics.text(this.font, this.statusMessage, this.width / 2 - statusWidth / 2, this.height - 30, 0xFFFFFF);
+		}
 	}
 
 	private void drawLabel(GuiGraphicsExtractor graphics, String text, int fieldY) {
 		Component label = Component.literal(text);
-		int labelWidth = this.font.width(label);
-		int x = this.width / 2 - FIELD_WIDTH / 2 - labelWidth - 8;
-		int y = fieldY + (FIELD_HEIGHT - 9) / 2;
-		graphics.text(this.font, label, x, y, 0xFFFFFF);
+		int x = this.width / 2 - FIELD_WIDTH / 2;
+		int y = fieldY - 11;
+		graphics.text(this.font, label, x, y, 0xAAAAAA);
 	}
 }
