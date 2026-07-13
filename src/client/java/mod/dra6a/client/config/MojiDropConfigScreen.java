@@ -7,13 +7,14 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class MojiDropConfigScreen extends Screen {
-	private static final int FIELD_WIDTH = 240;
+	private static final int FIELD_WIDTH = 320;
 	private static final int FIELD_HEIGHT = 20;
 	private static final int BUTTON_WIDTH = 100;
 	private static final int BUTTON_HEIGHT = 20;
 	private static final int BASE_SPACING = 34;
 	private static final int TOP_PADDING = 35;
 	private static final int BOTTOM_RESERVED = 35;
+	private static final int MIN_SIDE_MARGIN = 20;
 
 	private final Screen lastScreen;
 
@@ -26,6 +27,7 @@ public class MojiDropConfigScreen extends Screen {
 	private boolean enabled;
 	private Component statusMessage;
 	private int statusMessageTicks;
+	private int fieldWidth;
 
 	public MojiDropConfigScreen(Screen lastScreen) {
 		super(Component.literal("MojiDrop Config"));
@@ -37,7 +39,11 @@ public class MojiDropConfigScreen extends Screen {
 		MojiDropConfig config = MojiDropConfig.get();
 		this.enabled = config.enabled;
 
-		int x = this.width / 2 - FIELD_WIDTH / 2;
+		this.fieldWidth = Math.min(FIELD_WIDTH, this.width - MIN_SIDE_MARGIN * 2);
+		if (this.fieldWidth < 160) {
+			this.fieldWidth = 160;
+		}
+		int x = this.width / 2 - this.fieldWidth / 2;
 		int fieldCount = 6;
 		int requiredMinHeight = TOP_PADDING + fieldCount * BASE_SPACING + 10 + BUTTON_HEIGHT + BOTTOM_RESERVED;
 		int spacing = BASE_SPACING;
@@ -52,28 +58,28 @@ public class MojiDropConfigScreen extends Screen {
 
 		int y = TOP_PADDING;
 
-		this.apiKeyBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("API Key"));
+		this.apiKeyBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("API Key"));
 		this.apiKeyBox.setValue(config.apiKey);
-		this.apiKeyBox.setMaxLength(2048);
+		this.apiKeyBox.setMaxLength(8192);
 		this.apiKeyBox.setHint(Component.literal("例如：sk-...").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.apiKeyBox);
 		y += spacing;
 
-		this.apiUrlBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("API URL"));
+		this.apiUrlBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("API URL"));
 		this.apiUrlBox.setValue(config.apiUrl);
-		this.apiUrlBox.setMaxLength(1024);
+		this.apiUrlBox.setMaxLength(4096);
 		this.apiUrlBox.setHint(Component.literal("OpenAI 兼容地址").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.apiUrlBox);
 		y += spacing;
 
-		this.modelBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("Model"));
+		this.modelBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("Model"));
 		this.modelBox.setValue(config.model);
-		this.modelBox.setMaxLength(256);
+		this.modelBox.setMaxLength(512);
 		this.modelBox.setHint(Component.literal("例如：gpt-3.5-turbo").withStyle(net.minecraft.ChatFormatting.GRAY));
 		this.addRenderableWidget(this.modelBox);
 		y += spacing;
 
-		this.maxSuggestionsBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("Max Suggestions"));
+		this.maxSuggestionsBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("Max Suggestions"));
 		this.maxSuggestionsBox.setValue(String.valueOf(config.maxSuggestions));
 		this.maxSuggestionsBox.setMaxLength(1);
 		this.maxSuggestionsBox.setHint(Component.literal("1 - 5").withStyle(net.minecraft.ChatFormatting.GRAY));
@@ -81,7 +87,7 @@ public class MojiDropConfigScreen extends Screen {
 		this.addRenderableWidget(this.maxSuggestionsBox);
 		y += spacing;
 
-		this.requestCooldownBox = new EditBox(this.font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("Request Cooldown (ms)"));
+		this.requestCooldownBox = new EditBox(this.font, x, y, this.fieldWidth, FIELD_HEIGHT, Component.literal("Request Cooldown (ms)"));
 		this.requestCooldownBox.setValue(String.valueOf(config.requestCooldownMs));
 		this.requestCooldownBox.setMaxLength(9);
 		this.requestCooldownBox.setHint(Component.literal("两次请求间隔，毫秒").withStyle(net.minecraft.ChatFormatting.GRAY));
@@ -92,7 +98,7 @@ public class MojiDropConfigScreen extends Screen {
 		this.enabledButton = Button.builder(this.enabledLabel(), button -> {
 			this.enabled = !this.enabled;
 			button.setMessage(this.enabledLabel());
-		}).bounds(x, y, FIELD_WIDTH, FIELD_HEIGHT).build();
+		}).bounds(x, y, this.fieldWidth, FIELD_HEIGHT).build();
 		this.addRenderableWidget(this.enabledButton);
 		y += spacing + 10;
 
@@ -197,7 +203,7 @@ public class MojiDropConfigScreen extends Screen {
 
 	private void drawLabel(GuiGraphicsExtractor graphics, String text, int fieldY) {
 		Component label = Component.literal(text);
-		int x = this.width / 2 - FIELD_WIDTH / 2;
+		int x = this.width / 2 - this.fieldWidth / 2;
 		int y = fieldY - 11;
 		graphics.text(this.font, label, x, y, 0xAAAAAA);
 	}
