@@ -37,6 +37,7 @@ public class MojiDropConfig {
 	public String qaAnswerMode = "replace";
 	public boolean qaStrictTrigger = true;
 	public boolean debugLogging = true;
+	public String apiMode = "mixed"; // mixed, api, fallback
 
 	public static MojiDropConfig get() {
 		if (INSTANCE == null) {
@@ -121,6 +122,9 @@ public class MojiDropConfig {
 		}
 		if (qaAnswerMode == null || (!qaAnswerMode.equals("replace") && !qaAnswerMode.equals("append"))) {
 			qaAnswerMode = "replace";
+		}
+		if (apiMode == null || (!apiMode.equals("mixed") && !apiMode.equals("api") && !apiMode.equals("fallback"))) {
+			apiMode = "mixed";
 		}
 	}
 }
