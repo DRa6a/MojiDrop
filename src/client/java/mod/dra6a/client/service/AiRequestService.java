@@ -73,6 +73,7 @@ public class AiRequestService {
 		JsonObject requestBody = new JsonObject();
 		requestBody.addProperty("model", model);
 		requestBody.addProperty("max_tokens", maxTokens);
+		requestBody.addProperty("reasoning_effort", "low");
 
 		JsonArray messages = new JsonArray();
 
