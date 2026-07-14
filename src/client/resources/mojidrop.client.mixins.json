@@ -3,7 +3,6 @@
 	"package": "mod.dra6a.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"ExampleClientMixin",
 		"ChatScreenMixin",
 		"CommandSuggestionsMixin"
 	],
