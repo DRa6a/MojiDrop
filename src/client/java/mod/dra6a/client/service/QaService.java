@@ -1,21 +1,11 @@
 package mod.dra6a.client.service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import mod.dra6a.client.config.MojiDropConfig;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class QaService {
-	private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
-
 	private static final List<String> TRAILING_OFFER_PATTERNS = List.of(
 		"有什么可以帮你的吗[？?]",
 		"有什么我能帮你的吗[？?]",
@@ -48,73 +38,29 @@ public class QaService {
 			model = config.qaModel;
 		}
 
-		if (apiKey == null || apiKey.isBlank() || apiUrl == null || apiUrl.isBlank()) {
-			onError.accept(new IllegalStateException("API key or URL not configured"));
-			return;
-		}
-
-		JsonObject requestBody = new JsonObject();
-		requestBody.addProperty("model", model);
-		requestBody.addProperty("max_tokens", config.qaMaxTokens);
-
-		JsonArray messages = new JsonArray();
-
-		JsonObject systemMessage = new JsonObject();
-		systemMessage.addProperty("role", "system");
 		String prompt = config.qaSystemPrompt != null && !config.qaSystemPrompt.isBlank()
 			? config.qaSystemPrompt
 			: MojiDropConfig.DEFAULT_QA_SYSTEM_PROMPT;
-		systemMessage.addProperty("content", prompt);
-		messages.add(systemMessage);
 
-		JsonObject userMessage = new JsonObject();
-		userMessage.addProperty("role", "user");
-		userMessage.addProperty("content", question);
-		messages.add(userMessage);
-
-		requestBody.add("messages", messages);
-
-		HttpRequest request = HttpRequest.newBuilder()
-			.uri(URI.create(apiUrl))
-			.header("Content-Type", "application/json")
-			.header("Authorization", "Bearer " + apiKey)
-			.POST(HttpRequest.BodyPublishers.ofString(requestBody.toString(), StandardCharsets.UTF_8))
-			.build();
-
-		HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8))
-			.thenAccept(response -> {
-				try {
-					if (response.statusCode() < 200 || response.statusCode() >= 300) {
-						throw new RuntimeException("Unexpected HTTP status: " + response.statusCode() + " body: " + response.body());
-					}
-
-					JsonObject jsonResponse = JsonParser.parseString(response.body()).getAsJsonObject();
-					JsonArray choices = jsonResponse.getAsJsonArray("choices");
-					if (choices == null || choices.isEmpty()) {
-						throw new RuntimeException("No choices in response");
-					}
-
-					JsonObject message = choices.get(0).getAsJsonObject().getAsJsonObject("message");
-					if (message == null) {
-						throw new RuntimeException("No message in first choice");
-					}
-
-					String rawContent = message.get("content").getAsString();
+		AiRequestService.request(
+			apiKey,
+			apiUrl,
+			model,
+			prompt,
+			question,
+			config.qaMaxTokens,
+			config.apiMode,
+			rawContent -> {
 				DebugLogService.log("QA", question, rawContent);
 				String content = sanitizeAnswer(rawContent);
 				if (content.isEmpty()) {
-						throw new RuntimeException("Empty answer");
-					}
-
-					onSuccess.accept(content);
-				} catch (Exception e) {
-					onError.accept(e);
+					onError.accept(new RuntimeException("Empty answer"));
+					return;
 				}
-			})
-			.exceptionally(throwable -> {
-				onError.accept(throwable);
-				return null;
-			});
+				onSuccess.accept(content);
+			},
+			onError
+		);
 	}
 
 	public static String sanitizeAnswer(String answer) {

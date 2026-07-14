@@ -33,8 +33,10 @@ public class MojiDropConfigScreen extends Screen {
 	private EditBox requestCooldownBox;
 	private Button enabledButton;
 	private Button debugLoggingButton;
+	private Button apiModeButton;
 	private boolean enabled;
 	private boolean debugLogging;
+	private String apiMode;
 
 	private Button qaEnabledButton;
 	private Button qaUseSameAiButton;
@@ -74,6 +76,7 @@ public class MojiDropConfigScreen extends Screen {
 		MojiDropConfig config = MojiDropConfig.get();
 		this.enabled = config.enabled;
 		this.debugLogging = config.debugLogging;
+		this.apiMode = config.apiMode;
 		this.qaEnabled = config.qaEnabled;
 		this.qaUseSameAi = config.qaUseSameAi;
 		this.qaAnswerMode = config.qaAnswerMode;
@@ -92,6 +95,17 @@ public class MojiDropConfigScreen extends Screen {
 
 		this.addSectionLabel("颜文字补全", y);
 		y += 18;
+
+		this.apiModeButton = Button.builder(this.apiModeLabel(), btn -> {
+			this.apiMode = switch (this.apiMode) {
+				case "mixed" -> "api";
+				case "api" -> "fallback";
+				default -> "mixed";
+			};
+			btn.setMessage(this.apiModeLabel());
+		}).bounds(x, y, this.fieldWidth, FIELD_HEIGHT).build();
+		this.addScrollableWidget(this.apiModeButton);
+		y += BASE_SPACING;
 
 		this.apiKeyBox = this.addEditBox(x, y, "API 密钥", config.apiKey, "例如：sk-...", 8192);
 		y += BASE_SPACING;
@@ -217,6 +231,15 @@ public class MojiDropConfigScreen extends Screen {
 		return Component.literal("启用调试日志：" + (this.debugLogging ? "是" : "否"));
 	}
 
+	private Component apiModeLabel() {
+		String label = switch (this.apiMode) {
+			case "api" -> "仅使用用户 API";
+			case "fallback" -> "仅使用兜底 API";
+			default -> "混用模式（用户 API 优先）";
+		};
+		return Component.literal("API 模式：" + label);
+	}
+
 	private Component qaEnabledLabel() {
 		return Component.literal("启用 AI 问答：" + (this.qaEnabled ? "是" : "否"));
 	}
@@ -315,6 +338,7 @@ public class MojiDropConfigScreen extends Screen {
 
 		config.enabled = this.enabled;
 		config.debugLogging = this.debugLogging;
+		config.apiMode = this.apiMode;
 
 		config.qaEnabled = this.qaEnabled;
 		config.qaUseSameAi = this.qaUseSameAi;
