@@ -11,7 +11,7 @@ import org.lwjgl.glfw.GLFW;
 public class MojiDropClient implements ClientModInitializer {
 	private static final KeyMapping OPEN_CONFIG_KEY = new KeyMapping(
 		"key.mojidrop.openConfig",
-		GLFW.GLFW_KEY_O,
+		GLFW.GLFW_KEY_J,
 		KeyMapping.Category.MISC
 	);
 
