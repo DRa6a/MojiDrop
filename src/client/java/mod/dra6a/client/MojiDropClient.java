@@ -22,8 +22,8 @@ public class MojiDropClient implements ClientModInitializer {
 		KeyMappingHelper.registerKeyMapping(OPEN_CONFIG_KEY);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			if (OPEN_CONFIG_KEY.consumeClick() && !(client.screen instanceof MojiDropConfigScreen)) {
-				client.setScreen(new MojiDropConfigScreen(client.screen));
+			if (OPEN_CONFIG_KEY.consumeClick() && !(client.gui.screen() instanceof MojiDropConfigScreen)) {
+				client.setScreenAndShow(new MojiDropConfigScreen(client.gui.screen()));
 			}
 		});
 	}

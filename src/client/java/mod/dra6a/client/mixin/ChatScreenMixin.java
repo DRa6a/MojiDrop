@@ -253,8 +253,9 @@ public class ChatScreenMixin {
 		if (error instanceof IllegalStateException && "API key or URL not configured".equals(message)) {
 			if (!mojidrop$apiConfigWarningShown) {
 				mojidrop$apiConfigWarningShown = true;
-				Minecraft.getInstance().gui.getChat().addClientSystemMessage(
-					Component.literal("[MojiDrop] API Key 或 API URL 未配置，请按 O 键打开配置界面").withStyle(ChatFormatting.RED)
+				Minecraft.getInstance().gui.chatListener().handleSystemMessage(
+					Component.literal("[MojiDrop] API Key 或 API URL 未配置，请按 O 键打开配置界面").withStyle(ChatFormatting.RED),
+					false
 				);
 			}
 		} else {
@@ -265,8 +266,9 @@ public class ChatScreenMixin {
 				if (displayMessage.length() > 240) {
 					displayMessage = displayMessage.substring(0, 240);
 				}
-				Minecraft.getInstance().gui.getChat().addClientSystemMessage(
-					Component.literal("[MojiDrop] 请求失败: " + displayMessage).withStyle(ChatFormatting.RED)
+				Minecraft.getInstance().gui.chatListener().handleSystemMessage(
+					Component.literal("[MojiDrop] 请求失败: " + displayMessage).withStyle(ChatFormatting.RED),
+					false
 				);
 			}
 		}
@@ -278,8 +280,9 @@ public class ChatScreenMixin {
 		if (error instanceof IllegalStateException && "API key or URL not configured".equals(message)) {
 			if (!mojidrop$qaConfigWarningShown) {
 				mojidrop$qaConfigWarningShown = true;
-				Minecraft.getInstance().gui.getChat().addClientSystemMessage(
-					Component.literal("[MojiDrop 问答] API Key 或 API URL 未配置，请按 O 键打开配置界面").withStyle(ChatFormatting.RED)
+				Minecraft.getInstance().gui.chatListener().handleSystemMessage(
+					Component.literal("[MojiDrop 问答] API Key 或 API URL 未配置，请按 O 键打开配置界面").withStyle(ChatFormatting.RED),
+					false
 				);
 			}
 		} else {
@@ -290,8 +293,9 @@ public class ChatScreenMixin {
 				if (displayMessage.length() > 240) {
 					displayMessage = displayMessage.substring(0, 240);
 				}
-				Minecraft.getInstance().gui.getChat().addClientSystemMessage(
-					Component.literal("[MojiDrop 问答] 请求失败: " + displayMessage).withStyle(ChatFormatting.RED)
+				Minecraft.getInstance().gui.chatListener().handleSystemMessage(
+					Component.literal("[MojiDrop 问答] 请求失败: " + displayMessage).withStyle(ChatFormatting.RED),
+					false
 				);
 			}
 		}

@@ -344,12 +344,12 @@ public class MojiDropConfigScreen extends Screen {
 	}
 
 	private void closeWithoutSaving() {
-		this.minecraft.setScreen(this.lastScreen);
+		this.minecraft.setScreenAndShow(this.lastScreen);
 	}
 
 	@Override
 	public void onClose() {
-		this.minecraft.setScreen(this.lastScreen);
+		this.minecraft.setScreenAndShow(this.lastScreen);
 	}
 
 	@Override
