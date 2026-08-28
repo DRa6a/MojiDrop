@@ -28,7 +28,7 @@ public class PlayerMentionService {
 		}
 
 		String query = partialCommand.substring(atIndex + 1).toLowerCase(Locale.ROOT);
-		StringRange range = StringRange.at(atIndex + 1);
+		StringRange range = StringRange.between(atIndex + 1, cursorPosition);
 
 		Collection<PlayerInfo> playerInfos = minecraft.player.connection.getOnlinePlayers();
 		List<Suggestion> suggestions = new ArrayList<>();
