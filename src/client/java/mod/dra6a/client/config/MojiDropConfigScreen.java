@@ -38,20 +38,6 @@ public class MojiDropConfigScreen extends Screen {
 	private boolean debugLogging;
 	private String apiMode;
 
-	private Button qaEnabledButton;
-	private Button qaUseSameAiButton;
-	private Button qaAnswerModeButton;
-	private Button qaStrictTriggerButton;
-	private EditBox qaApiKeyBox;
-	private EditBox qaApiUrlBox;
-	private EditBox qaModelBox;
-	private EditBox qaSystemPromptBox;
-	private EditBox qaMaxTokensBox;
-	private boolean qaEnabled;
-	private boolean qaUseSameAi;
-	private String qaAnswerMode;
-	private boolean qaStrictTrigger;
-
 	private Component statusMessage;
 	private int statusMessageTicks;
 	private int fieldWidth;
@@ -77,10 +63,6 @@ public class MojiDropConfigScreen extends Screen {
 		this.enabled = config.enabled;
 		this.debugLogging = config.debugLogging;
 		this.apiMode = config.apiMode;
-		this.qaEnabled = config.qaEnabled;
-		this.qaUseSameAi = config.qaUseSameAi;
-		this.qaAnswerMode = config.qaAnswerMode;
-		this.qaStrictTrigger = config.qaStrictTrigger;
 
 		this.fieldWidth = Math.min(FIELD_WIDTH, this.width - MIN_SIDE_MARGIN * 2 - SCROLLBAR_WIDTH - SCROLLBAR_MARGIN);
 		if (this.fieldWidth < 160) {
@@ -131,47 +113,9 @@ public class MojiDropConfigScreen extends Screen {
 		this.debugLoggingButton = this.addToggleButton(x, y, this::debugLoggingLabel, () -> this.debugLogging = !this.debugLogging);
 		y += BASE_SPACING + SECTION_EXTRA_SPACING;
 
-		this.addSectionLabel("AI 问答（#q: 触发）", y);
-		y += 18;
-
-		this.qaEnabledButton = this.addToggleButton(x, y, this::qaEnabledLabel, () -> this.qaEnabled = !this.qaEnabled);
-		y += BASE_SPACING;
-
-		this.qaUseSameAiButton = this.addToggleButton(x, y, this::qaUseSameAiLabel, () -> {
-			this.qaUseSameAi = !this.qaUseSameAi;
-			this.updateQaApiFieldsEditable();
-		});
-		y += BASE_SPACING;
-
-		this.qaAnswerModeButton = Button.builder(this.qaAnswerModeLabel(), btn -> {
-			this.qaAnswerMode = "replace".equals(this.qaAnswerMode) ? "append" : "replace";
-			btn.setMessage(this.qaAnswerModeLabel());
-		}).bounds(x, y, this.fieldWidth, FIELD_HEIGHT).build();
-		this.addScrollableWidget(this.qaAnswerModeButton);
-		y += BASE_SPACING;
-
-		this.qaStrictTriggerButton = this.addToggleButton(x, y, this::qaStrictTriggerLabel, () -> this.qaStrictTrigger = !this.qaStrictTrigger);
-		y += BASE_SPACING;
-
-		this.qaApiKeyBox = this.addEditBox(x, y, "问答 API 密钥", config.qaApiKey, "与上方相同时留空", 8192);
-		y += BASE_SPACING;
-
-		this.qaApiUrlBox = this.addEditBox(x, y, "问答 API 地址", config.qaApiUrl, "与上方相同时留空", 4096);
-		y += BASE_SPACING;
-
-		this.qaModelBox = this.addEditBox(x, y, "问答 模型", config.qaModel, "与上方相同时留空", 512);
-		y += BASE_SPACING;
-
-		this.qaSystemPromptBox = this.addEditBox(x, y, "问答系统提示词", config.qaSystemPrompt, "控制问答风格，建议要求简短", 8192);
-		y += BASE_SPACING;
-
-		this.qaMaxTokensBox = this.addDigitEditBox(x, y, "问答最大长度（Tokens）", String.valueOf(config.qaMaxTokens), "限制回答长度", 4);
-		y += BASE_SPACING + 10;
-
 		this.contentHeight = y;
 		this.clampScrollOffset();
 		this.applyScrollOffset();
-		this.updateQaApiFieldsEditable();
 
 		int saveY = this.height - BOTTOM_RESERVED + 10;
 		Button saveButton = Button.builder(Component.literal("保存"), button -> this.saveConfig())
@@ -238,30 +182,6 @@ public class MojiDropConfigScreen extends Screen {
 			default -> "混用模式（用户 API 优先）";
 		};
 		return Component.literal("API 模式：" + label);
-	}
-
-	private Component qaEnabledLabel() {
-		return Component.literal("启用 AI 问答：" + (this.qaEnabled ? "是" : "否"));
-	}
-
-	private Component qaUseSameAiLabel() {
-		return Component.literal("问答使用相同 AI：" + (this.qaUseSameAi ? "是" : "否"));
-	}
-
-	private Component qaAnswerModeLabel() {
-		String mode = "replace".equals(this.qaAnswerMode) ? "替换问题" : "追加回答";
-		return Component.literal("问答回答模式：" + mode);
-	}
-
-	private Component qaStrictTriggerLabel() {
-		return Component.literal("严格触发格式：" + (this.qaStrictTrigger ? "开" : "关"));
-	}
-
-	private void updateQaApiFieldsEditable() {
-		boolean editable = !this.qaUseSameAi;
-		this.qaApiKeyBox.setEditable(editable);
-		this.qaApiUrlBox.setEditable(editable);
-		this.qaModelBox.setEditable(editable);
 	}
 
 	private void allowOnlyDigits(EditBox box) {
@@ -339,28 +259,6 @@ public class MojiDropConfigScreen extends Screen {
 		config.enabled = this.enabled;
 		config.debugLogging = this.debugLogging;
 		config.apiMode = this.apiMode;
-
-		config.qaEnabled = this.qaEnabled;
-		config.qaUseSameAi = this.qaUseSameAi;
-		config.qaApiKey = this.qaApiKeyBox.getValue();
-		config.qaApiUrl = this.qaApiUrlBox.getValue();
-		config.qaModel = this.qaModelBox.getValue();
-		config.qaSystemPrompt = this.qaSystemPromptBox.getValue();
-		config.qaAnswerMode = this.qaAnswerMode;
-		config.qaStrictTrigger = this.qaStrictTrigger;
-
-		int qaMaxTokens;
-		try {
-			qaMaxTokens = Integer.parseInt(this.qaMaxTokensBox.getValue());
-		} catch (NumberFormatException e) {
-			qaMaxTokens = 150;
-		}
-		if (qaMaxTokens < 1) {
-			qaMaxTokens = 1;
-		} else if (qaMaxTokens > 2048) {
-			qaMaxTokens = 2048;
-		}
-		config.qaMaxTokens = qaMaxTokens;
 
 		MojiDropConfig.save();
 		this.statusMessage = Component.literal("配置已保存").withStyle(net.minecraft.ChatFormatting.GREEN);

@@ -15,8 +15,7 @@ MojiDrop 是一个 Minecraft Fabric 客户端模组，能够在玩家输入聊�
 
 - **AI 实时补全**：在聊天输入框中输入空格后，模组会自动向配置的 AI 接口请求颜文字建议。
 - **@ 玩家提及**：在聊天输入框中输入 `@` 后，会自动弹出在线玩家选择列表，支持方向键选择、TAB 或鼠标点击插入玩家名称。
-- **AI 问答**：输入 `#q:问题 `（严格模式下问题与冒号之间无空格，且问题内不能有空格，第一个空格即表示问题结束）后，模组会向 AI 请求简短回答，并在建议列表显示约 10 字的答案概况，按 TAB 或点击即可将完整答案（带 `a:` 前缀）填入聊天框。
-- **兜底 API**：当用户提供的 API 不可用时，可自动或使用 `https://text.pollinations.ai` 进行补全与问答，无需额外配置即可使用。
+- **兜底 API**：当用户提供的 API 不可用时，可自动或使用 `https://text.pollinations.ai` 进行补全，无需额外配置即可使用。
 - **API 模式切换**：支持混用模式、仅用户 API 模式、仅兜底 API 模式。
 - **不打断命令输入**：输入 `/` 开头的命令时不会触发 AI 请求，避免干扰命令补全。
 - **原版建议列表**：返回的颜文字与玩家提及建议均以 Minecraft 原版的命令提示列表形式展示，支持方向键选择、TAB 或鼠标点击插入。
@@ -56,10 +55,7 @@ MojiDrop 是一个 Minecraft Fabric 客户端模组，能够在玩家输入聊�
 2. 启动游戏后，按 `J` 键打开配置界面，填入 API Key 和请求地址（也可选择仅使用兜底 API，无需填写）。
 3. 进入聊天输入框，输入任意内容后再按一次空格，等待 AI 返回颜文字建议。
 4. 输入 `@` 可触发在线玩家选择列表，方便快速 @ 其他玩家。
-5. 输入 `#q:问题 `（严格模式下问题与冒号之间无空格，问题内不能有空格，第一个空格表示问题结束）可向 AI 提问，返回后在建议栏看到答案概况，按 `TAB` 填充完整答案。
-   - 替换模式：用 `a: 答案` 替换掉 `#q:问题 `。
-   - 追加模式：在空格后追加 `a: 答案`，保留你输入的内容。
-6. 使用方向键选择建议，按 `TAB` 或鼠标点击将建议内容插入到当前输入文本中。
+5. 使用方向键选择建议，按 `TAB` 或鼠标点击将建议内容插入到当前输入文本中。
 
 ## 配置项
 
@@ -74,13 +70,6 @@ MojiDrop 是一个 Minecraft Fabric 客户端模组，能够在玩家输入聊�
 | API 模式 | `mixed` 混用、`api` 仅用户 API、`fallback` 仅兜底 API | `mixed` |
 | Enabled | 是否启用 AI 补全 | `true` |
 | Debug Logging | 是否记录每次输入与返回内容到日志文件 | `true` |
-| QA Enabled | 是否启用 `#q:` 问答功能 | `true` |
-| QA Use Same AI | 问答是否使用与颜文字相同的 AI 配置 | `true` |
-| QA API Key / URL / Model | 问答单独使用的 AI 配置（QA Use Same AI 为 false 时生效） | 空 |
-| QA System Prompt | 问答 AI 的系统提示词 | 见下 |
-| QA Max Tokens | 限制问答回答的最大长度 | `150` |
-| QA Answer Mode | 回答填充模式：`replace` 替换问题，`append` 追加回答 | `replace` |
-| QA Strict Trigger | 严格触发格式：问题与冒号之间、问题内均不能有空格 | `true` |
 
 默认 System Prompt：
 
@@ -89,14 +78,6 @@ You are a kaomoji suggestion assistant. Kaomoji are text-based emoticons such as
 ```
 
 其中 `%d` 会被替换为“最大建议数量”，不建议在自定义提示词中删除它。
-
-默认 QA System Prompt：
-
-```
-You are a concise Q&A assistant. Answer the user's question briefly and clearly in the same language as the question (answer in Chinese if the question is in Chinese). Keep answers short. Do not use Markdown formatting because the game chat does not support it. Provide ONLY the answer itself. Never add follow-up offers, closing questions, or extra sentences such as 'if you have more questions', '有什么可以帮你的吗？', '有什么我可以帮你的吗？', '还需要我帮你什么吗？', or similar. Do not use chain-of-thought reasoning; answer directly.
-```
-
-建议保留“简短回答”和“不添加结束语”相关描述，避免 AI 返回过长内容或多余句子。
 
 ## 配置文件
 
