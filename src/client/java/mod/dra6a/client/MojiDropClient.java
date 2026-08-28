@@ -4,7 +4,7 @@ import mod.dra6a.client.config.MojiDropConfig;
 import mod.dra6a.client.config.MojiDropConfigScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 
@@ -19,7 +19,7 @@ public class MojiDropClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		MojiDropConfig.load();
 
-		KeyMappingHelper.registerKeyMapping(OPEN_CONFIG_KEY);
+		KeyBindingHelper.registerKeyBinding(OPEN_CONFIG_KEY);
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (OPEN_CONFIG_KEY.consumeClick() && !(client.screen instanceof MojiDropConfigScreen)) {

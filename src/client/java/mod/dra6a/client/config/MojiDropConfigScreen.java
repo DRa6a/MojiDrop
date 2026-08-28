@@ -1,6 +1,6 @@
 package mod.dra6a.client.config;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -286,11 +286,11 @@ public class MojiDropConfigScreen extends Screen {
 	}
 
 	@Override
-	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-		super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+		super.render(graphics, mouseX, mouseY, partialTick);
 
 		int titleWidth = this.font.width(this.title);
-		graphics.text(this.font, this.title, this.width / 2 - titleWidth / 2, 20, 0xFFFFFF);
+		graphics.drawString(this.font, this.title, this.width / 2 - titleWidth / 2, 20, 0xFFFFFF);
 
 		graphics.enableScissor(0, this.viewportTop, this.width, this.viewportBottom);
 		for (LabelEntry label : this.scrollableLabels) {
@@ -298,7 +298,7 @@ public class MojiDropConfigScreen extends Screen {
 			if (y + 10 >= this.viewportTop && y <= this.viewportBottom) {
 				Component component = Component.literal(label.text);
 				int x = this.width / 2 - this.fieldWidth / 2 - (SCROLLBAR_WIDTH + SCROLLBAR_MARGIN) / 2;
-				graphics.text(this.font, component, x, y, label.color);
+				graphics.drawString(this.font, component, x, y, label.color);
 			}
 		}
 		graphics.disableScissor();
@@ -307,11 +307,11 @@ public class MojiDropConfigScreen extends Screen {
 
 		if (this.statusMessage != null) {
 			int statusWidth = this.font.width(this.statusMessage);
-			graphics.text(this.font, this.statusMessage, this.width / 2 - statusWidth / 2, this.height - 20, 0xFFFFFF);
+			graphics.drawString(this.font, this.statusMessage, this.width / 2 - statusWidth / 2, this.height - 20, 0xFFFFFF);
 		}
 	}
 
-	private void drawScrollbar(GuiGraphicsExtractor graphics) {
+	private void drawScrollbar(GuiGraphics graphics) {
 		int viewportHeight = this.viewportBottom - this.viewportTop;
 		if (this.contentHeight <= viewportHeight) {
 			return;
